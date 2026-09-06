@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Сводка</title>
+<meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#151716" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Сводка">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root {
+    --bg: #f6f4ef; --card: #fffdf8; --text: #1f2321; --muted: #6b716d;
+    --accent: #243b3f; --accent-soft: #e3ecec; --line: #e6e2d8; --warn: #8a5a00; --warn-bg: #fff4dc; --err: #a33;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151716; --card: #1e2120; --text: #ebe8e1; --muted: #9a9f9a;
+      --accent: #9cc3c8; --accent-soft: #23312f; --line: #2b2f2d; --warn: #f0c26a; --warn-bg: #2c2412; --err: #e08080;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
+  body {
+    font: 17px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 640px; margin: 0 auto; padding: 20px 16px 48px; }
+  header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+  h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 14px; }
+  button, input {
+    font: inherit; border: 1px solid var(--line); background: var(--card); color: var(--text);
+    border-radius: 12px; padding: 9px 13px; -webkit-tap-highlight-color: transparent;
+  }
+  button { cursor: pointer; }
+  button:disabled { color: var(--muted); cursor: default; }
+  button.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .refresh { font-size: 14px; white-space: nowrap; flex-shrink: 0; margin-top: 2px; }
+  .notice { font-size: 14px; color: var(--muted); margin: -6px 0 16px; min-height: 1em; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .front h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .front p { margin: 0; font-size: 16px; }
+  .front .flag { text-transform: none; letter-spacing: 0; font-size: 12px; padding: 2px 8px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); }
+  .front .flag.unusual { background: var(--warn-bg); color: var(--warn); }
+  .front.unusual { border-color: var(--warn); }
+  ol.items { list-style: none; padding: 0; margin: 0; counter-reset: n; }
+  ol.items li { position: relative; padding-left: 34px; }
+  ol.items li::before {
+    counter-increment: n; content: counter(n); position: absolute; left: 16px; top: 17px;
+    font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums;
+  }
+  .badges { display: flex; gap: 6px; margin-bottom: 4px; }
+  .badge { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding: 2px 7px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); }
+  .summary { margin: 0; }
+  .important .summary { font-weight: 600; }
+  details { margin-top: 8px; font-size: 14px; }
+  summary { color: var(--muted); cursor: pointer; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  details a { color: var(--accent); text-decoration: none; display: inline-block; margin: 4px 12px 0 0; }
+  .done { text-align: center; padding: 48px 16px; color: var(--muted); }
+  .done .check { font-size: 44px; margin-bottom: 8px; }
+  .done b { color: var(--text); font-size: 20px; display: block; margin-bottom: 8px; }
+  .done button { margin-top: 20px; }
+  .footer { text-align: center; margin-top: 24px; }
+  .warn { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
+  .raw p { margin: 8px 0 0; font-size: 15px; }
+  .raw a { color: var(--accent); font-size: 14px; text-decoration: none; }
+  .empty { color: var(--muted); text-align: center; padding: 40px 16px; }
+  .gate { max-width: 360px; margin: 18vh auto 0; text-align: center; }
+  .gate input { width: 100%; margin: 18px 0 10px; text-align: center; font-size: 18px; letter-spacing: .05em; }
+  .gate button { width: 100%; }
+  .err { color: var(--err); font-size: 14px; }
+  .link { background: none; border: none; color: var(--muted); font-size: 13px; padding: 12px; text-decoration: underline; }
+</style>
+</head>
+<body>
+<main id="app"><div class="empty">Загружаю сводку…</div></main>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  const CFG = Object.assign({ REFRESH_URL: "", REFRESH_KEY: "", COOLDOWN_HOURS: 5 }, window.SVODKA_CONFIG || {});
+  const MSK = "Europe/Moscow";
+  const app = document.getElementById("app");
+  let digest = null;
+  let cooldownTimer = null;
+
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const ls = {
+    get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
+  };
+
+  // ---- расшифровка сводки (AES-256-GCM, ключ из кода доступа через PBKDF2) ----
+  const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  async function decryptEnvelope(env, pass) {
+    const enc = new TextEncoder();
+    const base = await crypto.subtle.importKey("raw", enc.encode(pass.trim()), "PBKDF2", false, ["deriveKey"]);
+    const key = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: b64(env.salt), iterations: env.iterations || 150000, hash: "SHA-256" },
+      base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(env.iv) }, key, b64(env.ct));
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+  async function fetchRaw() {
+    const r = await fetch("./digest.json", { cache: "no-store" });
+    if (!r.ok) throw new Error("digest.json недоступен");
+    return r.json();
+  }
+  async function loadDigest() {
+    const raw = await fetchRaw();
+    if (!raw.encrypted) return raw;
+    const pass = ls.get("pass");
+    if (!pass) throw { needPass: true };
+    try { return await decryptEnvelope(raw, pass); }
+    catch { ls.set("pass", ""); throw { needPass: true, wrong: true }; }
+  }
+
+  // ---- вспомогательное ----
+  function dayWord(iso) {
+    const d = new Date(iso), now = new Date();
+    const f = (x) => x.toLocaleDateString("ru-RU", { timeZone: MSK });
+    if (f(d) === f(now)) return "сегодня";
+    const y = new Date(now); y.setDate(y.getDate() - 1);
+    if (f(d) === f(y)) return "вчера";
+    return d.toLocaleDateString("ru-RU", { timeZone: MSK, day: "numeric", month: "long" });
+  }
+  const timeOf = (iso) => new Date(iso).toLocaleTimeString("ru-RU", { timeZone: MSK, hour: "2-digit", minute: "2-digit" });
+  function spanText(since, until) {
+    if (!since) return "";
+    const h = Math.round((new Date(until) - new Date(since)) / 36e5);
+    if (h < 1) return "за последний час";
+    if (h < 48) return `за последние ${h} ч`;
+    return `за последние ${Math.round(h / 24)} дн.`;
+  }
+  function nextHint() {
+    // Считаем по московскому времени и реальному расписанию (7:00 и 18:30),
+    // а не по подписи сводки: подпись может не совпадать с ближайшим выпуском.
+    const parts = new Intl.DateTimeFormat("ru-RU", { timeZone: MSK, hour: "2-digit", minute: "2-digit", hour12: false })
+      .format(new Date()).split(":").map(Number);
+    const mins = (parts[0] % 24) * 60 + parts[1];
+    if (mins < 7 * 60) return "сегодня утром, около 7:00";
+    if (mins < 18 * 60 + 30) return "сегодня вечером, около 18:30";
+    return "завтра утром, около 7:00";
+  }
+  function fmtWait(ms) {
+    const m = Math.ceil(ms / 60000), h = Math.floor(m / 60), mm = m % 60;
+    return h ? `${h} ч ${mm} мин` : `${mm} мин`;
+  }
+  const refreshKey = () => (digest && digest.refresh_key) || CFG.REFRESH_KEY || "";
+
+  // ---- экран ввода кода доступа ----
+  function renderGate(wrong) {
+    app.innerHTML = `<div class="gate">
+      <h1>Сводка</h1>
+      <p class="sub">Введи код доступа — один раз, дальше приложение его запомнит.</p>
+      <input id="pass" type="password" autocomplete="current-password" placeholder="код доступа">
+      <button class="primary" id="unlock">Открыть</button>
+      ${wrong ? '<p class="err">Код не подошёл — попробуй ещё раз.</p>' : ""}
+    </div>`;
+    const input = document.getElementById("pass");
+    const go = () => { if (input.value.trim()) { ls.set("pass", input.value); start(); } };
+    document.getElementById("unlock").onclick = go;
+    input.onkeydown = (e) => { if (e.key === "Enter") go(); };
+    input.focus();
+  }
+
+  // ---- основной экран ----
+  function render() {
+    if (!digest) return;
+    const readAt = ls.get("readAt");
+    const parts = [];
+    const when = digest.generated_at
+      ? `${dayWord(digest.generated_at)} в ${timeOf(digest.generated_at)}${digest.since ? " · " + spanText(digest.since, digest.generated_at) : ""}`
+      : "ещё не собиралась";
+    const showRefresh = CFG.REFRESH_URL && refreshKey();
+    parts.push(`<header><div>
+      <h1>${esc(digest.label || "Сводка")}</h1>
+      <div class="sub">${when}</div>
+    </div>${showRefresh ? '<button class="refresh" id="refresh"></button>' : ""}</header>
+    <div class="notice" id="notice">${digest.nothing_new && digest.checked_at
+      ? `Проверено в ${timeOf(digest.checked_at)} — нового с тех пор нет.` : ""}</div>`);
+
+    if (digest.generated_at && readAt && readAt === digest.generated_at) {
+      parts.push(`<div class="done"><div class="check">✓</div><b>На сегодня всё</b>
+        Следующая сводка — ${nextHint()}.<br>
+        <button id="again">Показать ещё раз</button></div>`);
+    } else if (digest.error) {
+      parts.push(`<div class="card warn">Сводку собрать не удалось: ${esc(digest.error)}.<br>Вот свежие посты как есть:</div>`);
+      parts.push(`<div class="card raw">${(digest.raw || []).map((p) =>
+        `<p>${esc(p.text)}<br><a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.channel)} →</a></p>`).join("")}</div>`);
+    } else if (!digest.front && (!digest.items || !digest.items.length)) {
+      parts.push(`<div class="empty">${esc(digest.note || "Новых новостей нет")}</div>`);
+    } else {
+      const f = digest.front;
+      if (f && f.text) {
+        const unusual = f.status === "нестандартная";
+        parts.push(`<section class="card front${unusual ? " unusual" : ""}">
+          <h2><span>⚔️ Ситуация на фронте</span>
+            <span class="flag${unusual ? " unusual" : ""}">${unusual ? "нестандартный период" : "как обычно"}</span>
+          </h2>
+          <p>${esc(f.text)}</p></section>`);
+      }
+      if (!digest.items || !digest.items.length) {
+        parts.push(`<div class="empty">Ничего значимого сверх этого за период не произошло.</div>`);
+      }
+      parts.push(`<ol class="items">${(digest.items || []).map((it) => {
+        const badges = [];
+        if (it.importance >= 5) badges.push("важно");
+        if (it.status === "update") badges.push("продолжение");
+        const src = (it.sources || []).map((s) => `<a href="${esc(s.link)}" target="_blank" rel="noopener">${esc(s.channel)} →</a>`).join("");
+        return `<li class="card ${it.importance >= 4 ? "important" : ""}">
+          ${badges.length ? `<div class="badges">${badges.map((b) => `<span class="badge">${b}</span>`).join("")}</div>` : ""}
+          <p class="summary">${esc(it.summary)}</p>
+          ${src ? `<details><summary>источник</summary>${src}</details>` : ""}
+        </li>`;
+      }).join("")}</ol>
+      <div class="footer"><button class="primary" id="done">✓ На сегодня всё</button></div>`);
+    }
+    parts.push(`<div class="footer"><button class="link" id="forget">Сменить код доступа</button></div>`);
+
+    app.innerHTML = parts.join("");
+    document.getElementById("done")?.addEventListener("click", () => { ls.set("readAt", digest.generated_at); render(); });
+    document.getElementById("again")?.addEventListener("click", () => { ls.set("readAt", ""); render(); });
+    document.getElementById("forget")?.addEventListener("click", () => { ls.set("pass", ""); renderGate(false); });
+    setupRefresh();
+  }
+
+  // ---- кнопка «Обновить» с кулдауном ----
+  function setupRefresh() {
+    const btn = document.getElementById("refresh");
+    if (!btn) return;
+    clearInterval(cooldownTimer);
+    const tick = () => {
+      const last = Number(ls.get("refreshAt") || 0);
+      const wait = last + CFG.COOLDOWN_HOURS * 3600e3 - Date.now();
+      if (wait > 0) { btn.disabled = true; btn.textContent = `Обновить через ${fmtWait(wait)}`; }
+      else { btn.disabled = false; btn.textContent = "↻ Обновить"; }
+    };
+    tick();
+    cooldownTimer = setInterval(tick, 30000);
+    btn.onclick = requestRefresh;
+  }
+
+  async function requestRefresh() {
+    const btn = document.getElementById("refresh");
+    const notice = document.getElementById("notice");
+    btn.disabled = true; btn.textContent = "Запускаю…";
+    const prev = `${digest.generated_at || ""}|${digest.checked_at || ""}`;
+    try {
+      const r = await fetch(`${CFG.REFRESH_URL}?key=${encodeURIComponent(refreshKey())}`, { redirect: "follow" });
+      const data = await r.json();
+      if (data.ok) {
+        ls.set("refreshAt", String(Date.now()));
+      } else if (data.error === "cooldown") {
+        ls.set("refreshAt", String(Date.now() - CFG.COOLDOWN_HOURS * 3600e3 + data.retry_in_sec * 1000));
+        notice.textContent = `Обновляться можно раз в ${CFG.COOLDOWN_HOURS} часов — следующее через ${fmtWait(data.retry_in_sec * 1000)}.`;
+        setupRefresh(); return;
+      } else {
+        notice.textContent = "Не удалось запустить обновление. Попробуй позже.";
+        setupRefresh(); return;
+      }
+    } catch {
+      ls.set("refreshAt", String(Date.now())); // запрос скорее всего ушёл — просто ждём результат
+    }
+    notice.textContent = "Собираю свежую сводку — обычно это 3–5 минут. Можно закрыть приложение и вернуться.";
+    setupRefresh();
+    pollUntilChanged(prev);
+  }
+
+  function pollUntilChanged(prev) {
+    const started = Date.now();
+    const timer = setInterval(async () => {
+      try {
+        const raw = await fetchRaw();
+        // «Свежесть» = момент сборки ИЛИ момент проверки: если нового не нашлось,
+        // прошлая сводка остаётся на месте, меняется только отметка проверки.
+        const stamp = `${raw.generated_at || ""}|${raw.checked_at || ""}`;
+        if (raw.generated_at && stamp !== prev) {
+          clearInterval(timer);
+          const fresh = await loadDigest();
+          const isNew = fresh.generated_at !== digest.generated_at;
+          digest = fresh;
+          if (isNew) ls.set("readAt", "");
+          render();
+          document.getElementById("notice").textContent =
+            isNew ? "Сводка обновлена ✓" : `Проверено — нового с прошлого раза нет.`;
+          return;
+        }
+      } catch {}
+      if (Date.now() - started > 12 * 60e3) {
+        clearInterval(timer);
+        const n = document.getElementById("notice");
+        if (n) n.textContent = "Обновление затянулось — загляни чуть позже.";
+      }
+    }, 20000);
+  }
+
+  // ---- старт ----
+  function start() {
+    loadDigest().then((d) => { digest = d; render(); }).catch((e) => {
+      if (e && e.needPass) renderGate(!!e.wrong);
+      else app.innerHTML = '<div class="empty">Сводка пока не собрана или нет сети.<br>Загляни чуть позже.</div>';
+    });
+  }
+  start();
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+})();
+</script>
+</body>
+</html>
